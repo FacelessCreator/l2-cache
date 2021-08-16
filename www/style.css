@@ -1,0 +1,143 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    
+    margin: 0;
+
+    font-size: 12pt;
+}
+
+h1 {
+    font-size: 1.5em;    
+    margin: 0.5em 1em;
+}
+
+/* detect mobile phones */
+@media only screen and (max-device-width: 768px) {
+    body {
+        font-size: 24pt;
+    }
+}
+
+.page {
+    position: fixed;
+    left: 50%;
+    top: 0;
+    transform: translate(-50%, 0);
+
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    overflow: scroll;
+
+    background-color: #f1f0f0;
+
+    z-index: 1;
+}
+
+.pop-up-page {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 90%;
+    max-width: 500px;
+    /*height: 100%;*/
+
+    background-color: #f1f0f0;
+    padding: 1em;
+    border: 0.1em solid black;
+
+    z-index: 3;
+}
+
+.buttons-row {
+    width: 100%;
+    height: 3em;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    
+
+    background-color: #b8b8b8;
+}
+
+.buttons-list {
+    background-color: #dadada;
+}
+
+.tag-select {
+    height: 2.8em;
+    margin: 0.1em;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.button {
+    display: inline-block;
+    margin: 0.1em;
+    width: max-content;
+    background-color: #ffffff;
+    font-weight: 600;
+    line-height: 2.8em;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #c3c3c3;
+}
+
+.button:active {
+    background-color: #757575;
+}
+
+.button > img {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.value-p {
+    font-size: 1.2em;
+    font-weight: 500;
+    margin: 0.1em;
+}
+
+.card {
+    margin: 1em;
+    border: 0.1em solid black;
+}
+
+.card-content {
+    margin: 1em;
+}
+
+.card-content img {
+    height: auto; 
+    width: auto; 
+    max-width: 100%; 
+    max-height: 500px;
+    display: block;
+    margin: 0.2em auto;
+}
+
+.card-content pre {
+    white-space: normal;
+}
+
+textarea {
+    resize: vertical;
+    font-size: 1em;
+    margin: 1em auto;
+    border: 0.1em solid black;
+    display: block;
+    width: 96%;
+}
+
+input {
+    font-size: 1em;
+    margin: 0.1em;
+}

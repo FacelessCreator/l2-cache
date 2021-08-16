@@ -1,0 +1,54 @@
+{
+    "build": "2.1.0",
+    "bugs":
+    [
+        "tags duplicating",
+        "pre doesn't save line break",
+        "data formatting breaks?",
+        "403 error (authorization fail) isn't being catched everywhere"
+    ],
+    "todo":
+    [
+        "css support for lots of element types such as img and audio",
+        "catch errors between apps and with DB",
+        "redirect from http to https",
+        "close server if too many wrong requests to prevent attacks",
+        "less actions to add file, preview card, add tag or authorize",
+        "function to add YouTube videos",
+        "delete files function",
+        "layers of security to work safe but store all cards together",
+        "начинать новые абзацы с отступа",
+        "пересмотреть шрифты",
+        "автоматическое растяжение textarea",
+        "пояснение к тегам",
+        "поиск по нескольким тегам",
+        "categories of tags",
+        "protect 'delete' button",
+        "links to previous cards (such as thread continue or answer)",
+        "взять картинку из буфера обмена при прожатии ctrl+V",
+        "открывать картинки на полный экран",
+        "сверхбыстрые заметки",
+        "night mode",
+        "более красивый встроенный редактор html",
+        "store password hash in DB"
+    ],
+    "wrong solutions":
+    [
+        "не отлабливаются ошибки БД, передачи данных и т.д",
+        "не проверяется ввод пользователя на уровне приложения и сервера",
+        "имена блобов генерируются из текущего времени. Возможно, это небезопасно",
+        "ключ к приложению генерируется один на сессию для всех клиентов",
+        "не используются куки для авторизации",
+        "названия переменных и функций в JS нечитабельны",
+        "внешний вид веб-страницы заставляет тянуться за кернером",
+        "внутрь карточек можно включить вредоносный код",
+        "внутрь названия тегов можно включить вредоносный код"
+    ],
+    "update history":
+    {
+        "2.1.0": [
+            "better authorization with tokens and master-password",
+            "autosaves"
+        ]
+    }
+}
