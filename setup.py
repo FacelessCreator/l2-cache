@@ -7,7 +7,6 @@ SQL_SETUP_SCRIPT_PATH = 'docs/sql-setup.sql'
 
 os.system("rm -r "+BLOBS_PATH)
 os.system("rm "+DATABASE_PATH)
-os.system("mkdir "+DATABASE_PATH)
 os.system("mkdir "+BLOBS_PATH)
 
 conn = sqlite3.connect(DATABASE_PATH)
