@@ -61,6 +61,8 @@ function blob_to_text(blob) {
 PASSWORD_SALT = "brk,y246se1yt65shgslteg38";
 PASSWORD_SALT_BLOB = text_to_blob(PASSWORD_SALT);
 
+NOCRYPTO_CRYPTOKEY = -1; // fantom cryptokey for non-encrypted objects
+
 async function password_to_key(password) {
     return await window.crypto.subtle.importKey(
         "raw",
@@ -108,17 +110,22 @@ async function decrypt_blob(blob, iv, key) {
 }
 
 async function encrypt_object(obj, alter_key=null) {
-    var key = alter_key ? alter_key : cryptokey_containers[obj.cryptokey_id].key;
-    var iv = generate_iv();
-    var data_json = JSON.stringify(obj.data);
-    var data_blob = text_to_blob(data_json);
-    var encrypted_data = new Uint8Array(await encrypt_blob(data_blob, iv, key));
-    var full_encrypted_data = new Uint8Array([
-        ...iv,
-        ...encrypted_data
-    ]);
-    var data_base64 = base64EncArr(full_encrypted_data);
-    var new_obj = Object.assign({encrypted_data: data_base64}, obj);
+    var encrypted_data;
+    if (obj.cryptokey_id == NOCRYPTO_CRYPTOKEY) {
+        encrypted_data = JSON.stringify(obj.data);
+    } else {
+        var key = alter_key ? alter_key : cryptokey_containers[obj.cryptokey_id].key;
+        var iv = generate_iv();
+        var data_json = JSON.stringify(obj.data);
+        var data_blob = text_to_blob(data_json);
+        var encrypted_blob = new Uint8Array(await encrypt_blob(data_blob, iv, key));
+        var full_encrypted_blob = new Uint8Array([
+            ...iv,
+            ...encrypted_blob
+        ]);
+        encrypted_data = base64EncArr(full_encrypted_blob);
+    }
+    var new_obj = Object.assign({encrypted_data: encrypted_data}, obj);
     delete new_obj.data;
     return new_obj;
 }
@@ -150,12 +157,17 @@ async function encrypt_file_to_blob(file, cryptokey_id) {
 }
 
 async function decrypt_object(obj, alter_key=null) {
-    var key = cryptokey_containers[obj.cryptokey_id].key;
-    var full_encrypted_data = base64DecToArr(obj.encrypted_data);
-    var iv = full_encrypted_data.slice(0,16);
-    var encrypted_data = full_encrypted_data.slice(16);
-    var data_blob = await decrypt_blob(encrypted_data, iv, key);
-    var data_json = blob_to_text(data_blob);
+    var data_json;
+    if (obj.cryptokey_id == NOCRYPTO_CRYPTOKEY) {
+        data_json = obj.encrypted_data;
+    } else {
+        var key = alter_key ? alter_key : cryptokey_containers[obj.cryptokey_id].key;
+        var full_encrypted_data = base64DecToArr(obj.encrypted_data);
+        var iv = full_encrypted_data.slice(0,16);
+        var encrypted_data = full_encrypted_data.slice(16);
+        var data_blob = await decrypt_blob(encrypted_data, iv, key);
+        data_json = blob_to_text(data_blob);
+    }
     var new_obj = Object.assign({data: JSON.parse(data_json)}, obj);
     delete new_obj.encrypted_data;
     return new_obj;
@@ -322,6 +334,7 @@ DB_request.onerror = function (event) {
 
 function display_card_body(body_element, body) {
     body_element.innerHTML = "";
+    body = body.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     rows = body.split('\n');
     for (var i = 0; i < rows.length; i++) {
         var row = rows[i];
