@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<head>
+    <title>L2 cache server</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <LINK href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <header>
+        <a href="cryptokeys.html" class="current-choise">Cryptokeys</a>
+        <a href="keywords.html">Keywords</a>
+        <a href="cards.html">Cards</a>
+        <a href="blobs.html">Blobs</a>
+        <a href="editor.html">Editor</a>
+        <button id="lock-button">Lock</button>
+    </header>
+    <main>
+        <h1>Cryptokeys table</h1>
+        <table id="cryptokeys-table">
+            <tr>
+                <th>Id</th>
+                <th>Cryptokey hash</th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </table>
+        <div class="button-container">
+            <button id="add-cryptokey-button">Add cryptokey</button>
+            <button id="create-cryptokey-button">Create cryptokey</button>
+        </div>
+    </main>
+    <div class="popup-container" hidden>
+        <div id="add-cryptokey-popup" class="popup">
+            <h1>Add cryptokey</h1>
+            <input type="password" size=10 placeholder="new cryptokey">
+            <button>Okay</button>
+            <p class="code-descriptor">error message here</p>
+        </div>
+        <div id="edit-cryptokey-popup" class="popup">
+            <h1>Edit cryptokey</h1>
+            <input id="edit-id-input" type="number" size=10 value="0" placeholder="id" disabled>
+            <br>
+            <input id="edit-cryptokey-input" type="password" size=10 placeholder="cryptokey">
+            <input id="edit-repeat-cryptokey-input" type="password" size=10 placeholder="repeat cryptokey">
+            <br>
+            <input id="edit-name-input" type="text" size=10 placeholder="name">
+            <input id="edit-description-input" type="text" size=20 placeholder="description">
+            <br>
+            <button>Okay</button>
+            <p class="code-descriptor">error message here</p>
+        </div>
+    </div>
+</body>
+
+<script src="fthebase64.js"></script>
+<script src="main.js"></script>
+<script src="cryptokeys.js"></script>

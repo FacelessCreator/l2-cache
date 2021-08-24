@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<head>
+    <title>L2 cache server</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <LINK href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <header>
+        <a href="cryptokeys.html">Cryptokeys</a>
+        <a href="keywords.html">Keywords</a>
+        <a href="cards.html">Cards</a>
+        <a href="blobs.html">Blobs</a>
+        <a href="editor.html" class="current-choise">Editor</a>
+        <button id="lock-button">Lock</button>
+    </header>
+    <main>
+        <h1>Edit card</h1>
+        <div class="card">
+            <div class="header">
+                <div class="info">
+                    <p id="card-identifier" class="identifier">#2716</p>
+                    <p id="card-creation-time" class="creation-time">19.08.21 16:00</p>
+                    <p id="card-editing-time" class="editing-time">edited 20.08.21 15:55</p>
+                    <p class="cryptokey-id">cryptokey
+                        <select id="card-cryptokey-select" class="tag-select">
+                            
+                        </select>
+                    </p>
+                </div>
+                <span id="card-keywords-container" class="keywords-container">
+                    
+                </span>
+                <input id="add-keyword-input" type="text" size=10 placeholder="another word">
+                <button id="add-keyword-button" class="current-choise">Add</button>
+                <input id="upload-file-input" type="file" hidden>
+                <button id="upload-file-button">Upload file</button>
+            </div>
+            <textarea id="card-body-textarea" rows="1" class="auto_height"></textarea>
+        </div>
+        <div class="button-container">
+            <button id="preview-button">Preview</button>
+            <button id="save-button" class="current-choise">Save</button>
+            <button id="delete-button">Delete</button>
+            <p id="action-card-code-descriptor" class="code-descriptor"></p>
+        </div>
+        <h1>Preview</h1>
+        <span id="preview-card-container">
+            <div class="card">
+                <div class="header">
+                    <div class="info">
+                        <p class="identifier">#2716</p>
+                        <p class="creation-time">19.08.21 16:00</p>
+                        <p class="editing-time">edited 20.08.21 15:55</p>
+                        <p class="cryptokey-name">cryptokey 1</p>
+                    </div>
+                    <span class="keywords-container">
+                        
+                    </span>
+                    <button class="current-choise">Edit</button>
+                </div>
+                <div class="body">
+                    
+                </div>
+            </div>
+        </span>
+    </main>
+    <div class="popup-container" hidden>
+        <div id="did-you-mean-keyword-popup" class="popup">
+            <h1>Did you mean...</h1>
+            <table>
+                <tr>
+                    <th>Word</th>
+                    <th>Description</th>
+                </tr>
+            </table>
+            <div class="button-container">
+                <button id="new-keyword-button">New word</button>
+            </div>
+        </div>
+        <div id="new-keyword-popup" class="popup">
+            <h1>New keyword</h1>
+            <div class="button-container">
+                <p>Cryptokey <select id="new-keyword-cryptokey-id-select"></select></p>
+                <input id="new-keyword-name-input" type="text" size=10 placeholder="word">
+                <input id="new-keyword-description-input" type="text" size=20 placeholder="description">
+                <br>
+                <button id="new-keyword-okay-button">Create and add</button>
+                <p id="new-keyword-code-descriptor" class="code-descriptor">error message here</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="fthebase64.js"></script>
+<script src="main.js"></script>
+<script src="editor.js"></script>

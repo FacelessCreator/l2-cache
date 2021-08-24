@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<head>
+    <title>L2 cache server</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <LINK href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <header>
+        <a href="cryptokeys.html">Cryptokeys</a>
+        <a href="keywords.html">Keywords</a>
+        <a href="cards.html" class="current-choise">Cards</a>
+        <a href="blobs.html">Blobs</a>
+        <a href="editor.html">Editor</a>
+        <button id="lock-button">Lock</button>
+    </header>
+    <main>
+        <h1>Select keywords</h1>
+        <div class="button-container">
+            <span id="search-keywords-container" class="keywords-container">
+                    
+            </span>
+            <input id="search-add-keyword-input" type="text" size=10 placeholder="insert word">
+            <button id="search-add-keyword-button" class="current-choise">Add</button>
+            <button id="search-go-button" class="current-choise">GO</button>
+        </div>
+        <p id="search-code-descriptor" class="code-descriptor"></p>
+        <h1>Found</h1>
+        <div class="button-container">
+            <button id="found-home-button">Home</button>
+            <button id="found-previous-button">Previous</button>
+            <input id="found-page-number-input" type="number" value="1" size="4" disabled>
+            <button id="found-next-button">Next</button>
+        </div>
+        <div id="card-template" class="card" hidden>
+            <div class="header">
+                <div class="info">
+                    <p class="identifier">#2716</p>
+                    <p class="creation-time">19.08.21 16:00</p>
+                    <p class="editing-time">edited 20.08.21 15:55</p>
+                    <p class="cryptokey-name">cryptokey 1</p>
+                </div>
+                <span class="keywords-container">
+                    
+                </span>
+                <button class="current-choise">Edit</button>
+            </div>
+            <div class="body">
+                
+            </div>
+        </div>
+        <span id="card-container">
+            
+        </span>
+    </main>
+    <div class="popup-container" hidden>
+        <div id="did-you-mean-keyword-popup" class="popup">
+            <h1>Did you mean...</h1>
+            <table>
+                <tr>
+                    <th>Word</th>
+                    <th>Description</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+<script src="fthebase64.js"></script>
+<script src="main.js"></script>
+<script src="cards.js"></script>

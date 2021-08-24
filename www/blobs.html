@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<head>
+    <title>L2 cache server</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <LINK href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <header>
+        <a href="cryptokeys.html">Cryptokeys</a>
+        <a href="keywords.html">Keywords</a>
+        <a href="cards.html">Cards</a>
+        <a href="blobs.html" class="current-choise">Blobs</a>
+        <a href="editor.html">Editor</a>
+        <button id="lock-button">Lock</button>
+    </header>
+    <main>
+        <h1>Blobs search</h1>
+        <div class="button-container">
+            <input id="blob-header-search-word-input" type="text" size=10 placeholder="input word">
+            <button id="blob-header-search-okay-button">Search</button>
+        </div>
+        <table id="blob-headers-table">
+            <tr>
+                <th>Id</th>
+                <th>Creation time</th>
+                <th>Cryptokey id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Mimetype</th>
+                <th>Data</th>
+            </tr>
+        </table>
+        <div class="button-container">
+            <button id="add-new-blob-button">Add new blob</button>
+        </div>
+    </main>
+    <div class="popup-container" hidden>
+        <div id="edit-blob-popup" class="popup">
+            <h1>Edit blob</h1>
+            <div class="button-container">
+                <input id="edit-blob-id-input" type="number" size=10 disabled>
+                <p>Cryptokey <select id="edit-blob-cryptokey-id-select"></select></p>
+                <input id="edit-blob-name-input" type="text" size=10 placeholder="word">
+                <input id="edit-blob-description-input" type="text" size=20 placeholder="description">
+                <br>
+                <p>Data <input id="edit-blob-file-input" type="file"> (default - use old data)</p>
+                <br>
+                <button id="edit-blob-save-button">Save</button>
+                <button id="edit-blob-delete-button">Delete</button>
+                <p id="edit-blob-code-descriptor" class="code-descriptor">error message here</p>
+            </div>
+        </div>
+        <div id="view-blob-popup" class="popup">
+            <h1>View blob</h1>
+            <span id="view-blob-container">
+
+            </span>
+        </div>
+    </div>
+</body>
+
+<script src="fthebase64.js"></script>
+<script src="main.js"></script>
+<script src="blobs.js"></script>

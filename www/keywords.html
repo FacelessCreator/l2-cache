@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<head>
+    <title>L2 cache server</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <LINK href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <header>
+        <a href="cryptokeys.html">Cryptokeys</a>
+        <a href="keywords.html" class="current-choise">Keywords</a>
+        <a href="cards.html">Cards</a>
+        <a href="blobs.html">Blobs</a>
+        <a href="editor.html">Editor</a>
+        <button id="lock-button">Lock</button>
+    </header>
+    <main>
+        <h1>Keywords search</h1>
+        <div class="button-container">
+            <input id="keyword-search-word-input" type="text" size=10 placeholder="input word">
+            <button id="keyword-search-okay-button">Search</button>
+        </div>
+        <table id="keywords-table">
+            <tr>
+                <th>Id</th>
+                <th>Creation time</th>
+                <th>Cryptokey id</th>
+                <th>Word</th>
+                <th>Description</th>
+            </tr>
+        </table>
+        <div class="button-container">
+            <button id="add-new-keyword-button">Add new keyword</button>
+        </div>
+    </main>
+    <div class="popup-container" hidden>
+        <div id="add-popup" class="popup">
+            <h1>Edit keyword</h1>
+            <div class="button-container">
+                <input id="add-id-input" type="number" size=10 disabled>
+                <p>Cryptokey <select id="add-cryptokey-id-select"></select></p>
+                <input id="add-name-input" type="text" size=10 placeholder="word">
+                <input id="add-description-input" type="text" size=20 placeholder="description">
+                <br>
+                <button id="add-save-button">Save</button>
+                <button id="add-delete-button">Delete</button>
+                <p id="add-code-descriptor" class="code-descriptor">error message here</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="fthebase64.js"></script>
+<script src="main.js"></script>
+<script src="keywords.js"></script>
