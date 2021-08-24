@@ -338,6 +338,20 @@ function display_card_body(body_element, body) {
     rows = body.split('\n');
     for (var i = 0; i < rows.length; i++) {
         var row = rows[i];
+        var squire_branch_start_pos = row.indexOf('[');
+        while(squire_branch_start_pos > -1) {
+            var squire_branch_end_pos = row.indexOf(']');
+            var branch_start_pos = row.indexOf('(');
+            var branch_end_pos = row.indexOf(')');
+            if (squire_branch_end_pos == -1 || branch_start_pos == -1 || branch_end_pos == -1) {
+                break;
+            } else {
+                var link_url = row.slice(branch_start_pos+1, branch_end_pos);
+                var link_name = row.slice(squire_branch_start_pos+1, squire_branch_end_pos);
+                row = row.slice(0, squire_branch_start_pos) + '<a href=https://'+link_url+'>' + link_name + '</a>' + row.slice  (branch_end_pos+1, row.length);
+                squire_branch_start_pos = row.indexOf('[');
+            }
+        }
         if (row.startsWith('#')) {
             var element = document.createElement('h1');
             element.innerHTML = row.slice(1);

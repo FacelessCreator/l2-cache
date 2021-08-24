@@ -155,6 +155,7 @@ function add_keyword_go() {
         display_did_you_mean_keyword_popup(keywords_array);
     } else {
         display_new_keyword_popup();
+        new_keyword_name_input_element.value = filter;
     }
 }
 add_keyword_button_element.addEventListener('click', add_keyword_go);

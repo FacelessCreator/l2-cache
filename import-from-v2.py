@@ -17,6 +17,7 @@ def html_to_style_code(html_code):
     result = result.replace('</ul>', '')
     result = result.replace('<li>', '* ')
     result = result.replace('</li>', '')
+    return result
 
 old_conn = sqlite3.connect(OLD_DATABASE_PATH)
 old_cur = old_conn.cursor()
@@ -28,7 +29,7 @@ for card_tuple in old_cur.execute('select * from cards').fetchall():
     creation_time = card_tuple[1]
     editing_time = card_tuple[2]
     data = {
-        'body': card_tuple[3]
+        'body': html_to_style_code(card_tuple[3])
     }
     data_str = json.dumps(data)
     cryptokey_id = NOCRYPTO_CRYPTOKEY
