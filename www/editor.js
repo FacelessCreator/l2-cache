@@ -10,6 +10,9 @@ card = {
 };
 
 async function load_card() {
+    if (card.id != 0) {
+        return; // prevent second loading
+    }
     var url_params = new URLSearchParams(window.location.search);
     var card_id = url_params.get('card_id');
     if (card_id) {
