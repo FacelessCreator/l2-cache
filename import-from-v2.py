@@ -6,6 +6,18 @@ NEW_DATABASE_PATH = 'database/cards-v3.db'
 
 NOCRYPTO_CRYPTOKEY = -1 # fantom cryptokey for non-encrypted objects
 
+def all_html_hrefs_to_style_code(html_code):
+    result = str(html_code)
+    while True:
+        first_bracket_open_pos = result.find('<a href="')
+        first_bracket_close_pos = result.find('">')
+        second_bracket_open_pos = result.find('</a>')
+        if first_bracket_open_pos == -1 or first_bracket_close_pos == -1 or second_bracket_open_pos == -1:
+            return result
+        href = result[first_bracket_open_pos+9:first_bracket_close_pos]
+        name = result[first_bracket_close_pos+2:second_bracket_open_pos]
+        result = result[:first_bracket_open_pos] + '['+name+']' + '('+href+')' + result[second_bracket_open_pos+4:]
+
 def html_to_style_code(html_code):
     result = html_code.replace('<p>','')
     result = result.replace('<h1>', '# ')
@@ -17,6 +29,10 @@ def html_to_style_code(html_code):
     result = result.replace('</ul>', '')
     result = result.replace('<li>', '* ')
     result = result.replace('</li>', '')
+    result = result.replace('<b>', '**')
+    result = result.replace('</b>', '**')
+    result = result.replace('<br>', '\n')
+    result = all_html_hrefs_to_style_code(result)
     return result
 
 old_conn = sqlite3.connect(OLD_DATABASE_PATH)
