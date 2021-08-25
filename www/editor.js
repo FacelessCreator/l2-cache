@@ -313,12 +313,13 @@ upload_file_button_element.addEventListener('click', () => {
     upload_file_input_element.click();
 });
 
-upload_file_input_element.addEventListener("change", upload_file_go);
+upload_file_input_element.addEventListener("change", () => {
+    upload_file_go(upload_file_input_element.files[0]);
+} );
 
-async function upload_file_go() {
+async function upload_file_go(file) {
     action_card_code_descriptor_element.innerHTML = "";
     // collect
-    var file = upload_file_input_element.files[0];
     var blob_header = {
         id: 0,
         cryptokey_id: card_cryptokey_select_element.value,
@@ -357,3 +358,25 @@ async function upload_file_go() {
     card_body_textarea_element.value += '\n!blob ' + blob_header.id;
     preview_button_element.click();
 }
+
+function dropbox_enter_event(event) {
+    event.stopPropagation();
+    event.preventDefault();
+}
+
+function dropbox_over_event(event) {
+    event.stopPropagation();
+    event.preventDefault();
+}
+
+function dropbox_drop_event(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    var dataTransfer = event.dataTransfer;
+    var file = dataTransfer.files[0];
+    upload_file_go(file);
+}
+
+card_body_textarea_element.addEventListener('dragenter', dropbox_enter_event);
+card_body_textarea_element.addEventListener('dragover', dropbox_over_event);
+card_body_textarea_element.addEventListener('drop', dropbox_drop_event);
