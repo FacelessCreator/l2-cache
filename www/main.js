@@ -332,37 +332,52 @@ DB_request.onerror = function (event) {
     console.error("Indexed DB error");
 };
 
+function markdown_to_html_link(text) {
+    var result = String(text);
+    var squire_branch_start_pos = result.indexOf('[');
+    while(squire_branch_start_pos > -1) {
+        var squire_branch_end_pos = result.indexOf(']');
+        var branch_start_pos = result.indexOf('(');
+        var branch_end_pos = result.indexOf(')');
+        if (squire_branch_end_pos == -1 || branch_start_pos == -1 || branch_end_pos == -1 || squire_branch_start_pos > squire_branch_end_pos || squire_branch_end_pos > branch_start_pos || branch_start_pos > branch_end_pos) {
+            break;
+        } else {
+            var link_url = result.slice(branch_start_pos+1, branch_end_pos);
+            if (link_url.indexOf('://') == -1) {
+                link_url = 'https://' + link_url;
+            }
+            var link_name = result.slice(squire_branch_start_pos+1, squire_branch_end_pos);
+            result = result.slice(0, squire_branch_start_pos) + '<a href='+link_url+' target="_blank" rel="noopener noreferrer">' + link_name + '</a>' + result.slice (branch_end_pos+1, result.length);
+            squire_branch_start_pos = result.indexOf('[');
+        }
+    }
+    return result;
+}
+
+function markdown_to_html_bold(text) {
+    var result = String(text);
+    var double_stars_pos = result.indexOf('**');
+    var open_bold = true;
+    while (double_stars_pos > -1) {
+        if (open_bold) {
+            result = result.replace('**', '<b>')
+        } else {
+            result = result.replace('**', '</b>')
+        }
+        open_bold = !open_bold;
+        double_stars_pos = result.indexOf('**');
+    }
+    return result;
+}
+
 function display_card_body(body_element, body) {
     body_element.innerHTML = "";
     body = body.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     rows = body.split('\n');
     for (var i = 0; i < rows.length; i++) {
         var row = rows[i];
-        var squire_branch_start_pos = row.indexOf('[');
-        while(squire_branch_start_pos > -1) {
-            var squire_branch_end_pos = row.indexOf(']');
-            var branch_start_pos = row.indexOf('(');
-            var branch_end_pos = row.indexOf(')');
-            if (squire_branch_end_pos == -1 || branch_start_pos == -1 || branch_end_pos == -1) {
-                break;
-            } else {
-                var link_url = row.slice(branch_start_pos+1, branch_end_pos);
-                var link_name = row.slice(squire_branch_start_pos+1, squire_branch_end_pos);
-                row = row.slice(0, squire_branch_start_pos) + '<a href='+link_url+'>' + link_name + '</a>' + row.slice  (branch_end_pos+1, row.length);
-                squire_branch_start_pos = row.indexOf('[');
-            }
-        }
-        var double_stars_pos = row.indexOf('**');
-        var open_bold = true;
-        while (double_stars_pos > -1) {
-            if (open_bold) {
-                row = row.replace('**', '<b>')
-            } else {
-                row = row.replace('**', '</b>')
-            }
-            open_bold = !open_bold;
-            double_stars_pos = row.indexOf('**');
-        }
+        row = markdown_to_html_link(row);
+        row = markdown_to_html_bold(row);
         if (row.startsWith('##')) {
             var element = document.createElement('h2');
             element.innerHTML = row.slice(2);
@@ -456,9 +471,12 @@ async function get_blob_headers() {
 
 function new_message_element(message) {
     var element = document.createElement("p");
+    element.classList.add("card-body-inner-message");
     element.innerHTML = message;
     return element;
 }
+
+var prevent_display_blob_images = false;
 
 async function element_from_blob(blob_header_id) {
     var element;
@@ -475,14 +493,18 @@ async function element_from_blob(blob_header_id) {
     var encrypted_data = await response.arrayBuffer();
     var url = await dectrypt_file_to_resource_url(encrypted_data, blob_header.cryptokey_id);
     if (blob_header.data.mimetype.includes('image')) {
-        element = document.createElement('img');
-        element.src = url;
-        return element;
+        if (prevent_display_blob_images) {
+            element = new_message_element("Blob image "+blob_header_id+" loading prevented by rule");
+        } else {
+            element = document.createElement('img');
+            element.src = url;
+        }
     } else if (blob_header.data.mimetype.includes('audio')) {
         element = document.createElement('audio');
         element.src = url;
         element.controls = true;
-        return element;
+    } else {
+        element = new_message_element("Unknown blob mimetype "+ blob_header.data.mimetype);
     }
-    return new_message_element("Unknown blob mimetype "+ blob_header.data.mimetype);
+    return element;
 }

@@ -17,6 +17,14 @@ new_keyword_button = did_you_mean_keyword_popup_element.querySelector("#new-keyw
 
 search_code_descriptor_element = document.querySelector("#search-code-descriptor");
 
+found_prevent_display_blob_images_checkbox = document.querySelector("#found-prevent-display-blob-images-checkbox");
+prevent_display_blob_images = found_prevent_display_blob_images_checkbox.checked;
+function prevent_display_blob_images_click_event(event) {
+    prevent_display_blob_images = found_prevent_display_blob_images_checkbox.checked;
+    search_go();
+}
+found_prevent_display_blob_images_checkbox.addEventListener('click', prevent_display_blob_images_click_event);
+
 function display_search_keyword(id) {
     var keyword_element = document.createElement("button");
     if (id in keywords) {
@@ -127,6 +135,7 @@ async function search_go() {
     await Promise.all(Object.keys(cards).map((id) => decrypt_card_info(id)));
     display_cards(cards);
 }
+found_page_number_input_element.addEventListener('input', search_go);
 
 async function search_go_home() {
     found_page_number_input_element.value = 1;

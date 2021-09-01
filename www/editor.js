@@ -9,10 +9,12 @@ card = {
     }
 };
 
+already_loaded = false;
 async function load_card() {
-    if (card.id != 0) {
+    if (already_loaded) {
         return; // prevent second loading
     }
+    already_loaded = true;
     var url_params = new URLSearchParams(window.location.search);
     var card_id = url_params.get('card_id');
     if (card_id) {
@@ -25,6 +27,9 @@ async function load_card() {
         }
         var encrypted_card = await response.json();
         card = await decrypt_object(encrypted_card);
+    } else {
+        var cryptokey_containers_array = Object.values(cryptokey_containers);
+        card.cryptokey_id = cryptokey_containers_array[cryptokey_containers_array.length-1].id;
     }
     // display info
     display_cryptokeys_select();
@@ -96,6 +101,8 @@ function display_card_editor() {
     for (var i in card.keywords) {
         display_card_editor_keyword(card.keywords[i]);
     }
+    card_body_textarea_element.style.height = "auto";
+    card_body_textarea_element.style.height = (card_body_textarea_element.scrollHeight) + "px";
 }
 
 function display_cryptokeys_select() {
@@ -137,6 +144,7 @@ function autoheight_textarea_event(event) {
 }
 card_body_textarea_element.addEventListener('input', autoheight_textarea_event);
 
+var DID_YOU_MEAN_MAX_KEYWORDS = 7;
 function add_keyword_go() {
     // search keyword
     var filter = add_keyword_input_element.value;
@@ -153,6 +161,9 @@ function add_keyword_go() {
     var keywords_array = Object.values(keywords).filter(keyword => {
         return keyword.data.name.includes(filter) || keyword.data.description.includes(filter);
     });
+    if (keywords_array.length > DID_YOU_MEAN_MAX_KEYWORDS) {
+        keywords_array = keywords_array.slice(0, DID_YOU_MEAN_MAX_KEYWORDS-1);
+    }
     // open popup
     if (keywords_array.length > 0) {
         display_did_you_mean_keyword_popup(keywords_array);
@@ -206,6 +217,7 @@ function display_new_keyword_popup() {
     new_keyword_name_input_element.value = add_keyword_input_element.value;
     new_keyword_description_input_element.value = "";
     new_keyword_code_descriptor_element.innerHTML = "";
+    new_keyword_cryptokey_id_select_element.value = card_cryptokey_select_element.value;
 }
 
 async function new_keyword_go() {
@@ -285,7 +297,7 @@ async function save_card_go() {
     card.editing_time = encrypted_card.editing_time;
     display_card_editor();
     // close editor
-    window.open("cards.html","_self");
+    //window.open("cards.html","_self");
 }
 save_button_element.addEventListener('click', save_card_go);
 
@@ -304,7 +316,22 @@ async function delete_card_go() {
     // close editor
     window.open("cards.html","_self");
 }
-delete_button_element.addEventListener('click', delete_card_go);
+
+var delete_button_down_time;
+var DELETE_BUTTON_VALID_PRESS_TIME = 1000; // time in ms
+function delete_button_down_event() {
+    delete_button_down_time = Date.now();
+    card_body_textarea_element.classList.add("delete-active");
+}
+function delete_button_up_event() {
+    card_body_textarea_element.classList.remove("delete-active");
+    var delete_button_up_time = Date.now();
+    if (delete_button_up_time - delete_button_down_time >= DELETE_BUTTON_VALID_PRESS_TIME) {
+        delete_card_go();
+    }
+}
+delete_button_element.addEventListener('mousedown', delete_button_down_event);
+delete_button_element.addEventListener('mouseup', delete_button_up_event);
 
 upload_file_input_element = document.querySelector("#upload-file-input");
 upload_file_button_element = document.querySelector("#upload-file-button");
@@ -362,6 +389,13 @@ async function upload_file_go(file) {
 function dropbox_enter_event(event) {
     event.stopPropagation();
     event.preventDefault();
+    event.target.classList.add("dropbox-active"); 
+}
+
+function dropbox_leave_event(event) {
+    event.stopPropagation();
+    event.preventDefault();
+    event.target.classList.remove("dropbox-active"); 
 }
 
 function dropbox_over_event(event) {
@@ -373,10 +407,22 @@ function dropbox_drop_event(event) {
     event.stopPropagation();
     event.preventDefault();
     var dataTransfer = event.dataTransfer;
-    var file = dataTransfer.files[0];
-    upload_file_go(file);
+    for (var i = 0; i < dataTransfer.files.length; i++) {
+        upload_file_go(dataTransfer.files[i]);
+    }
+}
+
+function paste_event(event) {
+    if (event.clipboardData.files.length > 0) {
+        event.preventDefault();
+        for (var i = 0; i < event.clipboardData.files.length; i++) {
+            upload_file_go(event.clipboardData.files[i]);
+        }
+    }
 }
 
 card_body_textarea_element.addEventListener('dragenter', dropbox_enter_event);
+card_body_textarea_element.addEventListener('dragleave', dropbox_leave_event);
 card_body_textarea_element.addEventListener('dragover', dropbox_over_event);
 card_body_textarea_element.addEventListener('drop', dropbox_drop_event);
+card_body_textarea_element.addEventListener('paste', paste_event);

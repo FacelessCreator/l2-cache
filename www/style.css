@@ -124,9 +124,14 @@ input {
     margin: 0.1em;
     padding: 0.6em;
     color: #727272;
+    background-color: #ffffff;
     font-weight: 550;
     border: 0.1em solid #d4d4d4;
     border-radius: 0.3em;
+}
+
+input:disabled {
+    background-color: #e4e4e4;
 }
 
 select {
@@ -161,6 +166,9 @@ table {
     border: 0.1em solid #d4d4d4;
     border-radius: 0.3em;
     /* border-collapse: collapse; turn margin off between objects */
+    max-width: 100%;
+    display: block;
+    overflow-x: scroll;
 }
 
 table th {
@@ -236,7 +244,7 @@ p.value {
 
 .card {
     padding: 0;
-    margin: 0.5em 1em 0.5em 1em;
+    margin: 0.5em 1em 2.5em 1em;
     border: 0.1em solid #d4d4d4;
     border-radius: 0.5em;
 }
@@ -268,4 +276,21 @@ p.value {
 
 .card .body {
     padding: 0em 0em 1em 0em;
+}
+
+.card-body-inner-message {
+    font-size: 1.1em;
+    font-weight: 500;
+    border: 0.1em solid #d4d4d4;
+    width:max-content;
+}
+
+.dropbox-active {
+    background-color: #e2efff;
+    border: 0.5em dashed #547cad;
+}
+
+.delete-active {
+    background-color: #ffe2e2;
+    border: 0.5em dashed #ad5454;
 }
