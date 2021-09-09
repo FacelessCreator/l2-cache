@@ -3,11 +3,13 @@ import time
 from math import floor
 import atexit
 import os
+import signal
 import mimetypes
 import hashlib
 import string
 import random
 from threading import Thread
+import threading
 
 from flask import Flask, jsonify, abort, request, redirect, send_file, make_response
 from werkzeug.utils import secure_filename
@@ -99,6 +101,31 @@ def check_token(token: str, token_type):
         return False
     return True
 
+authority_errors_count = 0
+MAX_AUTHORITY_ERRORS = 5
+
+def log_authority_error():
+    global authority_errors_count
+    authority_errors_count+=1
+    if authority_errors_count >= MAX_AUTHORITY_ERRORS:
+        kill_server()
+
+def kill_server():
+    print("We are being attacked!")
+    save_database()
+    os.kill(os.getpid(), signal.SIGTERM)
+
+def check_and_return_token(token_type):
+    token = None
+    if token_type == REFRESH_TOKEN_TYPE:
+        token = request.headers.get('refresh_token', 'NO TOKEN')
+    elif token_type == ACCESS_TOKEN_TYPE:
+        token = request.headers.get('access_token', 'NO TOKEN')
+    if not token or not check_token(token, token_type):
+        log_authority_error()
+        abort(401)
+    return token
+
 def get_token_cryptokeys(token: str, token_type):
     cur = conn.cursor()
     table_name = ""
@@ -143,21 +170,18 @@ def get_access():
         resp.headers['refresh_token'], nothing = generate_token(request.remote_addr, cryptokey_ids, REFRESH_TOKEN_TYPE)
         resp.headers['access_token'], resp.headers['death_time'] = generate_token(request.remote_addr, cryptokey_ids, ACCESS_TOKEN_TYPE)
         return resp
+    log_authority_error()
     abort(404)
 
 @app.route('/api/access', methods=['DELETE'])
 def delete_access():
-    refresh_token = request.headers.get('refresh_token', 'NO TOKEN')
-    if not check_token(refresh_token, REFRESH_TOKEN_TYPE):
-        abort(401)
+    refresh_token = check_and_return_token(REFRESH_TOKEN_TYPE)
     abort_token(refresh_token, REFRESH_TOKEN_TYPE)
     return "OK"
 
 @app.route('/api/refresh', methods=['GET'])
 def get_refresh():
-    old_refresh_token = request.headers.get('refresh_token', 'NO TOKEN')
-    if not check_token(old_refresh_token, REFRESH_TOKEN_TYPE):
-        abort(401)
+    old_refresh_token = check_and_return_token(REFRESH_TOKEN_TYPE)
     cryptokey_ids = get_token_cryptokeys(old_refresh_token, REFRESH_TOKEN_TYPE)
     abort_token(old_refresh_token, REFRESH_TOKEN_TYPE)
     resp = make_response("OK")
@@ -167,9 +191,7 @@ def get_refresh():
 
 @app.route('/api/cryptokeys', methods=['GET'])
 def get_cryptokeys():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     cryptokey_tuples = cur.execute('select id, creation_time, editing_time, cryptokey_id, encrypted_data from cryptokeys where cryptokey_id in '+set_for_sql(allowed_cryptokeys)).fetchall()
@@ -186,9 +208,7 @@ def get_cryptokeys():
 
 @app.route('/api/cryptokeys', methods=['POST'])
 def post_cryptokeys():
-    old_refresh_token = request.headers.get('refresh_token', 'NO TOKEN')
-    if not check_token(old_refresh_token, REFRESH_TOKEN_TYPE):
-        abort(401)
+    old_refresh_token = check_and_return_token(REFRESH_TOKEN_TYPE)
     # modify cryptokey
     cryptokey = request.get_json(force=True)
     cur = conn.cursor()
@@ -214,9 +234,7 @@ def post_cryptokeys():
 
 @app.route('/api/cryptokeys/<int:id>', methods=['GET'])
 def get_cryptokey(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     cryptokey_tuples = cur.execute('select id, creation_time, editing_time, cryptokey_id, encrypted_data from cryptokeys where id=? and cryptokey_id in '+set_for_sql(allowed_cryptokeys), (id,)).fetchall()
@@ -234,9 +252,7 @@ def get_cryptokey(id):
 
 @app.route('/api/cryptokeys/<int:id>', methods=['PUT'])
 def put_cryptokey(id):
-    old_refresh_token = request.headers.get('refresh_token', 'NO TOKEN')
-    if not check_token(old_refresh_token, REFRESH_TOKEN_TYPE):
-        abort(401)
+    old_refresh_token = check_and_return_token(REFRESH_TOKEN_TYPE)
     # modify cryptokey
     cryptokey = request.get_json(force=True)
     cryptokey['id'] = id
@@ -259,9 +275,7 @@ def put_cryptokey(id):
 
 @app.route('/api/keywords', methods=['GET'])
 def get_keywords():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     keyword_tuples = cur.execute('select * from keywords where cryptokey_id in '+set_for_sql(allowed_cryptokeys)).fetchall()
@@ -279,9 +293,7 @@ def get_keywords():
 
 @app.route('/api/keywords', methods=['POST'])
 def post_keywords():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     keyword = request.get_json(force=True)
     keyword['id'] = floor(time.time())
@@ -294,9 +306,7 @@ def post_keywords():
 
 @app.route('/api/keywords/<int:id>', methods=['GET'])
 def get_keyword(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     keyword_tuples = cur.execute('select * from keywords where id=? and cryptokey_id in '+set_for_sql(allowed_cryptokeys), (id,)).fetchall()
@@ -314,9 +324,7 @@ def get_keyword(id):
 
 @app.route('/api/keywords/<int:id>', methods=['PUT'])
 def put_keyword(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     keyword = request.get_json(force=True)
     keyword['id'] = id
@@ -328,9 +336,7 @@ def put_keyword(id):
 
 @app.route('/api/keywords/<int:id>', methods=['DELETE'])
 def delete_keyword(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     cur.execute('delete from keywords where id=?', (id,))
     return "OK"
@@ -338,9 +344,7 @@ def delete_keyword(id):
 @app.route('/api/cards', methods=['GET'])
 def get_cards():
     # check auth
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     # prepare search
     limit = request.args.get('limit', default=10, type=int)
@@ -378,9 +382,7 @@ def get_cards():
 
 @app.route('/api/cards', methods=['POST'])
 def post_cards():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     card = request.get_json(force=True)
     card['id'] = floor(time.time())
@@ -395,9 +397,7 @@ def post_cards():
 
 @app.route('/api/cards/<int:id>', methods=['GET'])
 def get_card(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     card_tuples = cur.execute('select * from cards where id=? and cryptokey_id in '+set_for_sql(allowed_cryptokeys), (id,)).fetchall()
@@ -418,9 +418,7 @@ def get_card(id):
 
 @app.route('/api/cards/<int:id>', methods=['PUT'])
 def put_card(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     card = request.get_json(force=True)
     card['id'] = id
@@ -435,9 +433,7 @@ def put_card(id):
 
 @app.route('/api/cards/<int:id>', methods=['DELETE'])
 def delete_card(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     cur.execute('delete from cards where id=?', (id,))
     cur.execute('delete from card_keywords where card_id=?', (id,))
@@ -445,9 +441,7 @@ def delete_card(id):
 
 @app.route('/api/blob_headers', methods=['GET'])
 def get_blob_headers():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     blob_header_tuples = cur.execute('select * from blob_headers where cryptokey_id in '+set_for_sql(allowed_cryptokeys)).fetchall()
@@ -465,9 +459,7 @@ def get_blob_headers():
 
 @app.route('/api/blob_headers', methods=['POST'])
 def post_blob_headers():
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     blob_header = request.get_json(force=True)
     blob_header['id'] = floor(time.time())
@@ -480,9 +472,7 @@ def post_blob_headers():
 
 @app.route('/api/blob_headers/<int:id>', methods=['GET'])
 def get_blob_header(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     allowed_cryptokeys = get_token_cryptokeys(access_token, ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     blob_header_tuples = cur.execute('select * from blob_headers where id=? and cryptokey_id in '+set_for_sql(allowed_cryptokeys), (id,)).fetchall()
@@ -500,9 +490,7 @@ def get_blob_header(id):
 
 @app.route('/api/blob_headers/<int:id>', methods=['PUT'])
 def put_blob_header(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # modify
     blob_header = request.get_json(force=True)
     blob_header['id'] = id
@@ -514,9 +502,7 @@ def put_blob_header(id):
 
 @app.route('/api/blob_headers/<int:id>', methods=['DELETE'])
 def delete_blob_header(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     cur = conn.cursor()
     cur.execute('delete from blob_headers where id=?', (id,))
     path = BLOBS_PATH + '/b' + str(id)
@@ -526,9 +512,7 @@ def delete_blob_header(id):
 
 @app.route('/api/blobs/<int:id>', methods=['GET'])
 def get_blob(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # WIP check header author
     path = BLOBS_PATH + '/b' + str(id)
     if not os.path.isfile(path):
@@ -537,9 +521,7 @@ def get_blob(id):
 
 @app.route('/api/blobs/<int:id>', methods=['PUT'])
 def post_blob(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # WIP check header author
     f = request.files['blob']
     path = BLOBS_PATH + '/b' + str(id)
@@ -550,9 +532,7 @@ def post_blob(id):
 
 @app.route('/api/blobs/<int:id>', methods=['DELETE'])
 def delete_blob(id):
-    access_token = request.headers.get('access_token', 'NO TOKEN')
-    if not check_token(access_token, ACCESS_TOKEN_TYPE):
-        abort(401)
+    access_token = check_and_return_token(ACCESS_TOKEN_TYPE)
     # WIP check header author
     path = BLOBS_PATH + '/b' + str(id)
     if not os.path.isfile(path):
