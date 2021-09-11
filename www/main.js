@@ -503,6 +503,10 @@ async function element_from_blob(blob_header_id) {
         element = document.createElement('audio');
         element.src = url;
         element.controls = true;
+    } else if (blob_header.data.mimetype.includes('video')) {
+        element = document.createElement('video');
+        element.src = url;
+        element.controls = true;
     } else {
         element = new_message_element("Unknown blob mimetype "+ blob_header.data.mimetype);
     }

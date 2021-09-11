@@ -251,8 +251,10 @@ p.value {
 }
 
 .card img {
-    margin: 0.1em 0.1em 0.1em 1em;
-    max-width: 90%;
+    max-height: 30em;
+}
+
+.card video {
     max-height: 30em;
 }
 
@@ -294,4 +296,14 @@ p.value {
 .delete-active {
     background-color: #ffe2e2;
     border: 0.5em dashed #ad5454;
+}
+
+img {
+    margin: 0.1em 0.1em 0.1em 1em;
+    max-width: 90%;
+}
+
+video {
+    margin: 0.1em 0.1em 0.1em 1em;
+    max-width: 90%;
 }
