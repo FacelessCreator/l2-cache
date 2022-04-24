@@ -1,0 +1,5 @@
+.vscode
+env
+cert.pem
+key.pem
+database
